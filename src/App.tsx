@@ -2,217 +2,185 @@ import { useState } from 'react'
 import {
   FluentProvider,
   webLightTheme,
-  Button,
-  Field,
-  Input,
-  SpinButton,
   Text,
-  Divider,
-  MessageBar,
-  MessageBarBody,
   makeStyles,
-  tokens,
+  type Theme,
 } from '@fluentui/react-components'
-import {
-  TextBold24Regular,
-  TextItalic24Regular,
-  TextClearFormatting24Regular,
-  CursorClick24Regular,
-  TextT24Regular,
-} from '@fluentui/react-icons'
+import { BasicSettingsTab } from './components/tabs/BasicSettingsTab'
+import { CharCompositionTab } from './components/tabs/CharCompositionTab'
+import { FrameTab } from './components/tabs/FrameTab'
+import { FormulaTab } from './components/tabs/FormulaTab'
+import { TemplateTextTab } from './components/tabs/TemplateTextTab'
+
+type TabId = 'basic' | 'char' | 'frame' | 'formula' | 'template'
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: 'basic', label: '基本設定' },
+  { id: 'char', label: '文字組' },
+  { id: 'frame', label: '枠' },
+  { id: 'formula', label: '数式' },
+  { id: 'template', label: '定型文' },
+]
+
+// B案カラーパレットに合わせたカスタムテーマ
+const meiyushaTheme: Theme = {
+  ...webLightTheme,
+  colorBrandBackground: '#0c51a0',
+  colorBrandBackgroundHover: '#185fa5',
+  colorBrandBackgroundPressed: '#0c3370',
+  colorBrandForeground1: '#0c51a0',
+  colorBrandForeground2: '#185fa5',
+  colorNeutralBackground1: '#f5f9ff',
+  colorNeutralBackground2: '#dce8f7',
+  colorNeutralBackground3: '#dce8f7',
+  colorNeutralStroke1: '#c5dcf5',
+  colorNeutralStroke2: '#c5dcf5',
+  colorNeutralForeground1: '#0c3370',
+  colorNeutralForeground2: '#4a7cb5',
+  colorNeutralForeground3: '#7fb5e8',
+  fontFamilyBase: "'Noto Sans JP', 'Segoe UI', sans-serif",
+  fontFamilyNumeric: "'Sora', 'Segoe UI', sans-serif",
+  fontSizeBase300: '11px',
+}
 
 const useStyles = makeStyles({
-  root: {
-    padding: tokens.spacingHorizontalM,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-    minHeight: '100vh',
+  provider: {
+    width: '100%',
+    maxWidth: '100%',
     boxSizing: 'border-box',
   },
-  section: {
+  root: {
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
+    width: '100%',
+    maxWidth: '100%',
+    height: '100vh',
+    overflow: 'hidden',
+    boxSizing: 'border-box',
   },
-  buttonRow: {
+  header: {
+    backgroundColor: '#0c51a0',
+    padding: '12px 12px 0',
+    flexShrink: 0,
+    boxSizing: 'border-box',
+    width: '100%',
+  },
+  brandName: {
+    display: 'block',
+    color: '#7fb5e8',
+    fontSize: '8px',
+    letterSpacing: '0.25em',
+    marginBottom: '3px',
+    fontFamily: "'Sora', 'Noto Sans JP', sans-serif",
+  },
+  titleLight: {
+    color: '#ffffff',
+    fontSize: '17px',
+    fontWeight: '300',
+    lineHeight: '1.2',
+    display: 'block',
+    fontFamily: "'Noto Sans JP', sans-serif",
+  },
+  titleBold: {
+    color: '#ffffff',
+    fontSize: '17px',
+    fontWeight: '500',
+    lineHeight: '1.2',
+    display: 'block',
+    marginBottom: '12px',
+    fontFamily: "'Noto Sans JP', sans-serif",
+  },
+  tabBar: {
     display: 'flex',
-    gap: tokens.spacingHorizontalS,
-    flexWrap: 'wrap',
+    alignItems: 'flex-end',
+    width: '100%',
   },
-  selectedTextBox: {
-    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
-    backgroundColor: tokens.colorNeutralBackground3,
-    borderRadius: tokens.borderRadiusMedium,
-    wordBreak: 'break-all',
-    minHeight: '32px',
+  tabItem: {
+    flex: 1,
+    padding: '6px 4px',
+    fontSize: '9px',
+    color: '#7fb5e8',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '6px 6px 0 0',
+    cursor: 'pointer',
+    fontFamily: "'Noto Sans JP', sans-serif",
+    fontWeight: '400',
+    appearance: 'none',
+    textAlign: 'center',
+    whiteSpace: 'nowrap',
+    ':hover': {
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      color: '#b8d4f0',
+    },
+  },
+  tabSelected: {
+    flex: 1,
+    padding: '6px 4px',
+    fontSize: '9px',
+    color: '#0c51a0',
+    fontWeight: '500',
+    backgroundColor: '#f5f9ff',
+    border: 'none',
+    borderRadius: '6px 6px 0 0',
+    cursor: 'pointer',
+    fontFamily: "'Noto Sans JP', sans-serif",
+    appearance: 'none',
+    textAlign: 'center',
+    whiteSpace: 'nowrap',
+  },
+  body: {
+    flex: 1,
+    backgroundColor: '#f5f9ff',
+    padding: '12px',
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+    boxSizing: 'border-box',
+    width: '100%',
   },
 })
 
-type Status = { type: 'success' | 'error'; message: string }
-
 export default function App() {
   const styles = useStyles()
-  const [selectedText, setSelectedText] = useState<string | null>(null)
-  const [insertText, setInsertText] = useState('サンプルテキスト')
-  const [spacing, setSpacing] = useState(0)
-  const [status, setStatus] = useState<Status | null>(null)
-
-  /** Word.run のラッパー：エラーを status に表示 */
-  const runWord = async (action: (context: Word.RequestContext) => Promise<void>) => {
-    try {
-      await Word.run(async (context) => {
-        await action(context)
-      })
-    } catch (e) {
-      setStatus({ type: 'error', message: `エラー: ${e instanceof Error ? e.message : String(e)}` })
-    }
-  }
-
-  // ── 選択テキスト取得 ──────────────────────────────────────────────────────
-  const getSelection = () =>
-    runWord(async (context) => {
-      const range = context.document.getSelection()
-      range.load('text')
-      await context.sync()
-      setSelectedText(range.text || '（選択なし）')
-      setStatus(null)
-    })
-
-  // ── 書式設定 ──────────────────────────────────────────────────────────────
-  const toggleBold = () =>
-    runWord(async (context) => {
-      const range = context.document.getSelection()
-      range.load('font/bold')
-      await context.sync()
-      range.font.bold = !range.font.bold
-      await context.sync()
-      setStatus({ type: 'success', message: '太字を切り替えました' })
-    })
-
-  const toggleItalic = () =>
-    runWord(async (context) => {
-      const range = context.document.getSelection()
-      range.load('font/italic')
-      await context.sync()
-      range.font.italic = !range.font.italic
-      await context.sync()
-      setStatus({ type: 'success', message: '斜体を切り替えました' })
-    })
-
-  const clearFormat = () =>
-    runWord(async (context) => {
-      const range = context.document.getSelection()
-      range.font.bold = false
-      range.font.italic = false
-      range.font.underline = Word.UnderlineType.none
-      await context.sync()
-      setStatus({ type: 'success', message: '書式をクリアしました' })
-    })
-
-  // ── 字間調整 ──────────────────────────────────────────────────────────────
-  const applySpacing = () =>
-    runWord(async (context) => {
-      const range = context.document.getSelection()
-      range.font.spacing = spacing
-      await context.sync()
-      setStatus({ type: 'success', message: `字間を ${spacing}pt に設定しました` })
-    })
-
-  // ── テキスト挿入 ──────────────────────────────────────────────────────────
-  const insertAtCursor = () =>
-    runWord(async (context) => {
-      const range = context.document.getSelection()
-      range.insertText(insertText, Word.InsertLocation.replace)
-      await context.sync()
-      setStatus({ type: 'success', message: 'テキストを挿入しました' })
-    })
+  const [activeTab, setActiveTab] = useState<TabId>('basic')
 
   return (
-    <FluentProvider theme={webLightTheme}>
+    <FluentProvider theme={meiyushaTheme} className={styles.provider}>
       <div className={styles.root}>
-        <Text size={500} weight="bold">
-          Word パネル
-        </Text>
 
-        {/* ── 選択テキスト ── */}
-        <div className={styles.section}>
-          <Text weight="semibold">選択テキスト</Text>
-          <Button icon={<CursorClick24Regular />} appearance="secondary" onClick={getSelection}>
-            選択テキストを取得
-          </Button>
-          {selectedText !== null && (
-            <div className={styles.selectedTextBox}>
-              <Text size={200}>{selectedText}</Text>
-            </div>
-          )}
-        </div>
+        {/* ── ヘッダー ── */}
+        <div className={styles.header}>
+          <Text block className={styles.brandName}>MEIYUSHA</Text>
+          <Text block className={styles.titleLight}>かんたん</Text>
+          <Text block className={styles.titleBold}>ツールボックス</Text>
 
-        <Divider />
-
-        {/* ── 書式設定 ── */}
-        <div className={styles.section}>
-          <Text weight="semibold">書式設定</Text>
-          <div className={styles.buttonRow}>
-            <Button icon={<TextBold24Regular />} appearance="secondary" onClick={toggleBold}>
-              太字
-            </Button>
-            <Button icon={<TextItalic24Regular />} appearance="secondary" onClick={toggleItalic}>
-              斜体
-            </Button>
-            <Button
-              icon={<TextClearFormatting24Regular />}
-              appearance="secondary"
-              onClick={clearFormat}
-            >
-              書式クリア
-            </Button>
+          {/* タブバー */}
+          <div className={styles.tabBar} role="tablist">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                className={activeTab === tab.id ? styles.tabSelected : styles.tabItem}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        <Divider />
-
-        {/* ── 字間調整 ── */}
-        <div className={styles.section}>
-          <Text weight="semibold">字間調整</Text>
-          <Field label="字間 (pt)" hint="正の値で広げる、負の値で詰める（-10〜50pt）">
-            <SpinButton
-              value={spacing}
-              min={-10}
-              max={50}
-              step={0.5}
-              onChange={(_, data) => setSpacing(data.value ?? 0)}
-            />
-          </Field>
-          <Button appearance="primary" onClick={applySpacing}>
-            選択範囲に適用
-          </Button>
+        {/* ── ボディ ── */}
+        <div className={styles.body} role="tabpanel">
+          {activeTab === 'basic' && <BasicSettingsTab />}
+          {activeTab === 'char' && <CharCompositionTab />}
+          {activeTab === 'frame' && <FrameTab />}
+          {activeTab === 'formula' && <FormulaTab />}
+          {activeTab === 'template' && <TemplateTextTab />}
         </div>
 
-        <Divider />
-
-        {/* ── テキスト挿入 ── */}
-        <div className={styles.section}>
-          <Text weight="semibold">テキスト挿入</Text>
-          <Field label="挿入するテキスト">
-            <Input
-              value={insertText}
-              onChange={(_, d) => setInsertText(d.value)}
-              contentAfter={<TextT24Regular />}
-            />
-          </Field>
-          <Button appearance="primary" onClick={insertAtCursor}>
-            カーソル位置に挿入
-          </Button>
-        </div>
-
-        {/* ── ステータス ── */}
-        {status && (
-          <MessageBar intent={status.type === 'success' ? 'success' : 'error'}>
-            <MessageBarBody>{status.message}</MessageBarBody>
-          </MessageBar>
-        )}
       </div>
     </FluentProvider>
   )
 }
+
