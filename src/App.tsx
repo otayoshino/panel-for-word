@@ -1,25 +1,52 @@
+// src/App.tsx
+// ルートコンポーネント — タブ管理・画面切替（メイン↔設定）・テーマを管理する
+
 import { useState } from 'react'
 import {
   FluentProvider,
   webLightTheme,
-  Text,
   makeStyles,
   type Theme,
 } from '@fluentui/react-components'
-import { BasicSettingsTab } from './components/tabs/BasicSettingsTab'
-import { CharCompositionTab } from './components/tabs/CharCompositionTab'
-import { FrameTab } from './components/tabs/FrameTab'
-import { FormulaTab } from './components/tabs/FormulaTab'
-import { TemplateTextTab } from './components/tabs/TemplateTextTab'
-
-type TabId = 'basic' | 'char' | 'frame' | 'formula' | 'template'
+import { Header } from './components/Header'
+import { FeatureGrid } from './components/FeatureGrid'
+import type { TabId, FeatureItem } from './types/feature'
+// 基本設定の個別機能コンポーネント
+import { PageSettingsFeature } from './components/features/basic/PageSettingsFeature'
+import { PaperSizeFeature } from './components/features/basic/PaperSizeFeature'
+import { FontSizeFeature } from './components/features/basic/FontSizeFeature'
+import { PageMarginFeature } from './components/features/basic/PageMarginFeature'
+import { ColumnLayoutFeature } from './components/features/basic/ColumnLayoutFeature'
+// 文字組の個別機能コンポーネント
+import { IndentFeature } from './components/features/typography/IndentFeature'
+import { LineSpacingFeature } from './components/features/typography/LineSpacingFeature'
+import { TableInsertFeature } from './components/features/typography/TableInsertFeature'
+import { FontReplaceFeature } from './components/features/typography/FontReplaceFeature'
+// 枠の個別機能コンポーネント
+import { ImageInsertFeature } from './components/features/frame/ImageInsertFeature'
+import { ContentControlFeature } from './components/features/frame/ContentControlFeature'
+// 数式の個別機能コンポーネント
+import { SymbolsFormulaFeature } from './components/features/formula/SymbolsFormulaFeature'
+import { FractionFormulaFeature } from './components/features/formula/FractionFormulaFeature'
+import { ScriptFormulaFeature } from './components/features/formula/ScriptFormulaFeature'
+import { RadicalFormulaFeature } from './components/features/formula/RadicalFormulaFeature'
+import { IntegralFormulaFeature } from './components/features/formula/IntegralFormulaFeature'
+import { LargeOpFormulaFeature } from './components/features/formula/LargeOpFormulaFeature'
+import { BracketFormulaFeature } from './components/features/formula/BracketFormulaFeature'
+import { TrigFuncFormulaFeature } from './components/features/formula/TrigFuncFormulaFeature'
+import { AccentFormulaFeature } from './components/features/formula/AccentFormulaFeature'
+import { OperatorFormulaFeature } from './components/features/formula/OperatorFormulaFeature'
+import { MatrixFormulaFeature } from './components/features/formula/MatrixFormulaFeature'
+// 定型文の個別機能コンポーネント
+import { TemplateTextFeature } from './components/features/template/TemplateTextFeature'
+import { SymbolSeriesFeature } from './components/features/template/SymbolSeriesFeature'
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'basic', label: '基本設定' },
-  { id: 'char', label: '文字組' },
-  { id: 'frame', label: '枠' },
-  { id: 'formula', label: '数式' },
-  { id: 'template', label: '定型文' },
+  { id: 'basic',      label: '基本設定' },
+  { id: 'typography', label: '文字組' },
+  { id: 'border',     label: '枠' },
+  { id: 'formula',    label: '数式' },
+  { id: 'template',   label: '定型文' },
 ]
 
 // B案カラーパレットに合わせたカスタムテーマ
@@ -38,7 +65,7 @@ const meiyushaTheme: Theme = {
   colorNeutralForeground1: '#0c3370',
   colorNeutralForeground2: '#4a7cb5',
   colorNeutralForeground3: '#7fb5e8',
-  fontFamilyBase: "'Noto Sans JP', 'Segoe UI', sans-serif",
+  fontFamilyBase: "'Yu Gothic', 'Meiryo', 'Noto Sans JP', sans-serif",
   fontFamilyNumeric: "'Sora', 'Segoe UI', sans-serif",
   fontSizeBase300: '11px',
 }
@@ -58,42 +85,11 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     boxSizing: 'border-box',
   },
-  header: {
-    backgroundColor: '#0c51a0',
-    padding: '12px 12px 0',
-    flexShrink: 0,
-    boxSizing: 'border-box',
-    width: '100%',
-  },
-  brandName: {
-    display: 'block',
-    color: '#7fb5e8',
-    fontSize: '8px',
-    letterSpacing: '0.25em',
-    marginBottom: '3px',
-    fontFamily: "'Sora', 'Noto Sans JP', sans-serif",
-  },
-  titleLight: {
-    color: '#ffffff',
-    fontSize: '17px',
-    fontWeight: '300',
-    lineHeight: '1.2',
-    display: 'block',
-    fontFamily: "'Noto Sans JP', sans-serif",
-  },
-  titleBold: {
-    color: '#ffffff',
-    fontSize: '17px',
-    fontWeight: '500',
-    lineHeight: '1.2',
-    display: 'block',
-    marginBottom: '12px',
-    fontFamily: "'Noto Sans JP', sans-serif",
-  },
   tabBar: {
     display: 'flex',
     alignItems: 'flex-end',
     width: '100%',
+    backgroundColor: '#1e4d8c',
   },
   tabItem: {
     flex: 1,
@@ -104,7 +100,7 @@ const useStyles = makeStyles({
     border: 'none',
     borderRadius: '6px 6px 0 0',
     cursor: 'pointer',
-    fontFamily: "'Noto Sans JP', sans-serif",
+    fontFamily: "'Yu Gothic', 'Meiryo', sans-serif",
     fontWeight: '400',
     appearance: 'none',
     textAlign: 'center',
@@ -124,7 +120,7 @@ const useStyles = makeStyles({
     border: 'none',
     borderRadius: '6px 6px 0 0',
     cursor: 'pointer',
-    fontFamily: "'Noto Sans JP', sans-serif",
+    fontFamily: "'Yu Gothic', 'Meiryo', sans-serif",
     appearance: 'none',
     textAlign: 'center',
     whiteSpace: 'nowrap',
@@ -138,23 +134,71 @@ const useStyles = makeStyles({
     boxSizing: 'border-box',
     width: '100%',
   },
+  featurePanel: {
+    backgroundColor: '#ffffff',
+    border: '1px solid #c5dcf5',
+    borderRadius: '10px',
+    padding: '10px',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
 })
 
 export default function App() {
   const styles = useStyles()
   const [activeTab, setActiveTab] = useState<TabId>('basic')
+  // 選択中の機能（null = メイン画面、non-null = 設定画面）
+  const [currentFeature, setCurrentFeature] = useState<FeatureItem | null>(null)
+
+  // 選択した機能 ID に対応するコンポーネントを返す
+  const renderSettingsComponent = (feature: FeatureItem) => {
+    switch (feature.id) {
+      // 基本設定
+      case 'page-settings':       return <PageSettingsFeature />
+      case 'paper-size':          return <PaperSizeFeature />
+      case 'font-size':           return <FontSizeFeature />
+      case 'page-margin':         return <PageMarginFeature />
+      case 'columns':             return <ColumnLayoutFeature />
+      // 文字組
+      case 'indent':              return <IndentFeature />
+      case 'line-spacing':        return <LineSpacingFeature />
+      case 'table-insert':        return <TableInsertFeature />
+      case 'font-replace':        return <FontReplaceFeature />
+      // 枠
+      case 'image-insert':        return <ImageInsertFeature />
+      case 'content-control':     return <ContentControlFeature />
+      // 数式
+      case 'formula-symbols':     return <SymbolsFormulaFeature />
+      case 'formula-fraction':    return <FractionFormulaFeature />
+      case 'formula-script':      return <ScriptFormulaFeature />
+      case 'formula-radical':     return <RadicalFormulaFeature />
+      case 'formula-integral':    return <IntegralFormulaFeature />
+      case 'formula-large-op':    return <LargeOpFormulaFeature />
+      case 'formula-bracket':     return <BracketFormulaFeature />
+      case 'formula-trig':        return <TrigFuncFormulaFeature />
+      case 'formula-accent':      return <AccentFormulaFeature />
+      case 'formula-operator':    return <OperatorFormulaFeature />
+      case 'formula-matrix':      return <MatrixFormulaFeature />
+      case 'formula-math-symbols': return <SymbolsFormulaFeature />
+      // 定型文
+      case 'template-text':       return <TemplateTextFeature />
+      case 'template-symbol':     return <SymbolSeriesFeature />
+      default:                    return null
+    }
+  }
 
   return (
     <FluentProvider theme={meiyushaTheme} className={styles.provider}>
       <div className={styles.root}>
 
-        {/* ── ヘッダー ── */}
-        <div className={styles.header}>
-          <Text block className={styles.brandName}>MEIYUSHA</Text>
-          <Text block className={styles.titleLight}>かんたん</Text>
-          <Text block className={styles.titleBold}>ツールボックス</Text>
+        {/* ── 共通ヘッダー：アドイン名 or 戻るボタン ── */}
+        <Header
+          currentFeature={currentFeature}
+          onBack={() => setCurrentFeature(null)}
+        />
 
-          {/* タブバー */}
+        {/* ── タブバー：メイン画面のみ表示 ── */}
+        {currentFeature === null && (
           <div className={styles.tabBar} role="tablist">
             {TABS.map((tab) => (
               <button
@@ -168,15 +212,19 @@ export default function App() {
               </button>
             ))}
           </div>
-        </div>
+        )}
 
         {/* ── ボディ ── */}
         <div className={styles.body} role="tabpanel">
-          {activeTab === 'basic' && <BasicSettingsTab />}
-          {activeTab === 'char' && <CharCompositionTab />}
-          {activeTab === 'frame' && <FrameTab />}
-          {activeTab === 'formula' && <FormulaTab />}
-          {activeTab === 'template' && <TemplateTextTab />}
+          {currentFeature === null ? (
+            // メイン画面：現在のタブの機能カードグリッドを表示
+            <FeatureGrid tabId={activeTab} onSelect={setCurrentFeature} />
+          ) : (
+            // 設定画面：白背景パネルで包んで表示
+            <div className={styles.featurePanel}>
+              {renderSettingsComponent(currentFeature)}
+            </div>
+          )}
         </div>
 
       </div>
