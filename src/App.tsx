@@ -89,8 +89,9 @@ const useStyles = makeStyles({
     boxSizing: 'border-box',
   },
   tabBar: {
+    position: 'relative',
     display: 'flex',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     width: '100%',
     backgroundColor: '#1e4d8c',
   },
@@ -131,6 +132,9 @@ const useStyles = makeStyles({
     },
   },
   featureName: {
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
     color: '#ffffff',
     fontSize: '11px',
     fontWeight: '600',
@@ -138,7 +142,8 @@ const useStyles = makeStyles({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    paddingLeft: '4px',
+    maxWidth: '60%',
+    pointerEvents: 'none',
   },
   tabSelected: {
     flex: 1,
