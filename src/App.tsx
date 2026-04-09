@@ -125,9 +125,20 @@ const useStyles = makeStyles({
     appearance: 'none',
     textAlign: 'left',
     whiteSpace: 'nowrap',
+    flexShrink: 0,
     ':hover': {
       backgroundColor: 'rgba(255,255,255,0.15)',
     },
+  },
+  featureName: {
+    color: '#ffffff',
+    fontSize: '11px',
+    fontWeight: '600',
+    fontFamily: "'Yu Gothic', 'Meiryo', sans-serif",
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    paddingLeft: '4px',
   },
   tabSelected: {
     flex: 1,
@@ -289,12 +300,15 @@ export default function App() {
               </button>
             ))
           ) : (
-            <button
-              className={styles.backButton}
-              onClick={() => setCurrentFeature(null)}
-            >
-              ← 戻る
-            </button>
+            <>
+              <button
+                className={styles.backButton}
+                onClick={() => setCurrentFeature(null)}
+              >
+                ← 戻る
+              </button>
+              <span className={styles.featureName}>{currentFeature.label}</span>
+            </>
           )}
         </div>
 
