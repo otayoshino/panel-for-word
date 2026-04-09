@@ -22,7 +22,6 @@ import {
   ArrowSortRegular,
   ImageRegular,
   TextboxRegular,
-  NumberSymbolRegular,
   MathFormatProfessionalRegular,
   AutosumRegular,
   BracesRegular,
@@ -248,14 +247,6 @@ const ALL_FEATURES: FeatureItem[] = [
     ),
     tooltip: '2×2 行列を挿入します',
   },
-  {
-    id: 'formula-symbols',
-    label: '記号入力',
-    tabId: 'formula',
-    icon: <NumberSymbolRegular fontSize={24} />,
-    tooltip: '# $ % & @ の記号をカーソル位置に挿入します',
-  },
-
   // ── 定型文 ───────────────────────────────────────────────────────────
   {
     id: 'template-text',

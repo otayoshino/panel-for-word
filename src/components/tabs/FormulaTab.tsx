@@ -11,8 +11,6 @@ import { SectionHeader } from '../shared/SectionHeader'
 import { StatusBar } from '../shared/StatusBar'
 import { useWordRun } from '../../hooks/useWordRun'
 
-const SYMBOLS = ['#', '$', '%', '&', '@'] as const
-
 type ScriptType = 'sup' | 'sub' | 'subSup' | 'leftSubSup'
 const SCRIPT_TYPES: { value: ScriptType; label: string }[] = [
   { value: 'sup',        label: '上付き文字' },
@@ -120,18 +118,6 @@ const useStyles = makeStyles({
     padding: '10px',
     marginBottom: '8px',
   },
-  buttonRow: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(5, 1fr)',
-    gap: tokens.spacingHorizontalS,
-    width: '100%',
-  },
-  symbolButton: {
-    minWidth: 'unset',
-    width: '100%',
-    fontFamily: 'monospace',
-    fontSize: '16px',
-  },
   btnFull: {
     width: '100%',
     fontSize: '11px',
@@ -153,13 +139,6 @@ export function FormulaTab() {
   const [accentType, setAccentType] = useState<AccentType>('vec')
   const [matrixType, setMatrixType] = useState<MatrixType>('matrix2x2')
   const [operatorType, setOperatorType] = useState<OperatorType>('colonEq')
-
-  const insertSymbol = (sym: string) =>
-    runWord(async (context) => {
-      const range = context.document.getSelection()
-      range.insertText(sym, Word.InsertLocation.replace)
-      await context.sync()
-    })
 
   const insertScript = () =>
     runWord(async (context) => {
@@ -755,23 +734,6 @@ export function FormulaTab() {
         <Button appearance="primary" className={styles.btnFull} onClick={insertMatrix}>
           挿入
         </Button>
-      </div>
-
-      <div className={styles.section}>
-        <SectionHeader title="記号入力" />
-        <Text size={200}>カーソル位置に記号を挿入します。</Text>
-        <div className={styles.buttonRow}>
-          {SYMBOLS.map((sym) => (
-            <Button
-              key={sym}
-              appearance="secondary"
-              className={styles.symbolButton}
-              onClick={() => insertSymbol(sym)}
-            >
-              {sym}
-            </Button>
-          ))}
-        </div>
       </div>
 
       <StatusBar status={status} />

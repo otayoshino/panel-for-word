@@ -27,7 +27,6 @@ import { FontReplaceFeature } from './components/features/typography/FontReplace
 import { ImageInsertFeature } from './components/features/frame/ImageInsertFeature'
 import { ContentControlFeature } from './components/features/frame/ContentControlFeature'
 // 数式の個別機能コンポーネント
-import { SymbolsFormulaFeature } from './components/features/formula/SymbolsFormulaFeature'
 import { FractionFormulaFeature } from './components/features/formula/FractionFormulaFeature'
 import { ScriptFormulaFeature } from './components/features/formula/ScriptFormulaFeature'
 import { RadicalFormulaFeature } from './components/features/formula/RadicalFormulaFeature'
@@ -223,7 +222,6 @@ export default function App() {
       case 'image-insert':        return <ImageInsertFeature />
       case 'content-control':     return <ContentControlFeature />
       // 数式
-      case 'formula-symbols':     return <SymbolsFormulaFeature />
       case 'formula-fraction':    return <FractionFormulaFeature />
       case 'formula-script':      return <ScriptFormulaFeature />
       case 'formula-radical':     return <RadicalFormulaFeature />
