@@ -29,5 +29,17 @@ export function useWordRun() {
     }
   }
 
-  return { runWord, status, setStatus }
+  // Word.runをラップせずtry-catchのみ（内部で自前のWord.runを複数呼ぶ場合に使用）
+  const runRaw = async (action: () => Promise<void>) => {
+    try {
+      await action()
+    } catch (e) {
+      setStatus({
+        type: 'error',
+        message: `エラー: ${e instanceof Error ? e.message : String(e)}`,
+      })
+    }
+  }
+
+  return { runWord, runRaw, status, setStatus }
 }
