@@ -13,10 +13,10 @@ export function getTokenizer(): Promise<Tokenizer<IpadicFeatures>> {
   if (_tokenizer) return Promise.resolve(_tokenizer)
   if (_initPromise) return _initPromise
 
-  // Vite の base に合わせた dict パス
-  // import.meta.env.BASE_URL は vite/client 型なしでも string として利用可
+  // kuromoji のブラウザ用 XHR ローダーを使うため絶対 URL にする
+  // http(s):// 始まりの場合のみ XHR ローダーが選択される
   const base = (import.meta as unknown as { env: { BASE_URL: string } }).env?.BASE_URL ?? '/'
-  const dicPath = `${base}dict`
+  const dicPath = window.location.origin + base + 'dict'
 
   _initPromise = new Promise<Tokenizer<IpadicFeatures>>((resolve, reject) => {
     kuromoji.builder({ dicPath }).build((err, tokenizer) => {

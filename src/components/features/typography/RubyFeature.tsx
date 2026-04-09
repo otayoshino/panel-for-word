@@ -1,5 +1,5 @@
 // src/components/features/typography/RubyFeature.tsx
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Text, makeStyles, tokens, Spinner } from '@fluentui/react-components'
 import { SectionHeader } from '../../shared/SectionHeader'
 import { StatusBar } from '../../shared/StatusBar'
@@ -13,12 +13,23 @@ const useStyles = makeStyles({
   note: {
     fontSize: '11px',
     color: tokens.colorNeutralForeground2,
-    lineHeight: '1.5',
+    lineHeight: '1.6',
   },
-  preloadRow: {
+  noteWarn: {
+    fontSize: '11px',
+    color: '#b85c00',
+    lineHeight: '1.6',
+    backgroundColor: '#fff8f0',
+    border: '1px solid #f5d0a0',
+    borderRadius: '6px',
+    padding: '6px 8px',
+  },
+  statusRow: {
     display: 'flex',
     gap: tokens.spacingHorizontalS,
     alignItems: 'center',
+    fontSize: '11px',
+    color: tokens.colorNeutralForeground2,
   },
 })
 
@@ -28,19 +39,20 @@ export function RubyFeature() {
   const [dictLoading, setDictLoading] = useState(false)
   const [dictReady, setDictReady] = useState(false)
 
-  /** 辞書を事前ロード（初回のみ数秒かかる） */
-  const preloadDict = async () => {
+  /** コンポーネントマウント時にバックグラウンドで辞書をロード開始 */
+  useEffect(() => {
     setDictLoading(true)
-    try {
-      await getTokenizer()
-      setDictReady(true)
-      setStatus({ type: 'success', message: '辞書の読み込みが完了しました' })
-    } catch (e) {
-      setStatus({ type: 'error', message: `辞書読み込みエラー: ${e instanceof Error ? e.message : String(e)}` })
-    } finally {
-      setDictLoading(false)
-    }
-  }
+    getTokenizer()
+      .then(() => {
+        setDictReady(true)
+      })
+      .catch(() => {
+        // ロード失敗時は applyRuby 内でエラーを表示する
+      })
+      .finally(() => {
+        setDictLoading(false)
+      })
+  }, [])
 
   /** 選択テキストにルビを振って Word に書き戻す */
   const applyRuby = () =>
@@ -59,7 +71,6 @@ export function RubyFeature() {
         return
       }
 
-      // 形態素解析（辞書未ロードの場合はここで初期化）
       let pairs
       try {
         pairs = await textToRubyPairs(text)
@@ -79,28 +90,27 @@ export function RubyFeature() {
       <SectionHeader title="自動ルビ" />
 
       <Text className={styles.note}>
-        選択したテキストの漢字にルビ（ふりがな）を振ります。
-        初回実行時に辞書ファイルの読み込みが発生します（約30秒）。
-        事前に「辞書を読み込む」で準備しておくと快適に使えます。
+        選択したテキストの漢字にルビ（ふりがな）を自動で振ります。
       </Text>
 
-      <div className={styles.preloadRow}>
-        <Button
-          appearance="secondary"
-          size="small"
-          onClick={preloadDict}
-          disabled={dictLoading || dictReady}
-          icon={dictLoading ? <Spinner size="tiny" /> : undefined}
-        >
-          {dictLoading ? '読み込み中...' : dictReady ? '辞書読み込み済み' : '辞書を読み込む'}
-        </Button>
-      </div>
+      {!dictReady && (
+        <Text className={styles.noteWarn}>
+          ⚠ 初回実行時は辞書ファイルの読み込みに20〜30秒かかります。
+          読み込み完了後にルビが適用されます。
+        </Text>
+      )}
+
+      {dictLoading && (
+        <div className={styles.statusRow}>
+          <Spinner size="tiny" />
+          <span>辞書を読み込んでいます...</span>
+        </div>
+      )}
 
       <Button
         appearance="primary"
         className={styles.btnFull}
         onClick={applyRuby}
-        disabled={dictLoading}
       >
         実行（選択範囲にルビを振る）
       </Button>
