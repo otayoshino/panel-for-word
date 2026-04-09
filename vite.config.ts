@@ -54,6 +54,10 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    commonjsOptions: {
+      // kuromoji は CJS パッケージのため本番ビルドでも確実に変換する
+      include: [/kuromoji/, /node_modules/],
+    },
   },
   optimizeDeps: {
     include: ['kuromoji'],
