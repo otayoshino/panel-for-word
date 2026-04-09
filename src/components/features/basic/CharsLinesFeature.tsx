@@ -1,7 +1,7 @@
 // src/components/features/basic/CharsLinesFeature.tsx
 // 文字数・行数の設定 — pageSetup.charsLine / linesPage（WordApiDesktop 1.3）を使用
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button, Field, SpinButton, makeStyles, tokens } from '@fluentui/react-components'
 import { StatusBar } from '../../shared/StatusBar'
 import { useWordRun } from '../../../hooks/useWordRun'
@@ -31,6 +31,19 @@ export function CharsLinesFeature() {
   const { runWord, status } = useWordRun()
   const [charsLine, setCharsLine] = useState(40)
   const [linesPage, setLinesPage] = useState(36)
+
+  useEffect(() => {
+    Word.run(async (context) => {
+      const sections = context.document.sections
+      sections.load('items')
+      await context.sync()
+      const ps = sections.items[0].pageSetup
+      ps.load(['charsLine', 'linesPage'])
+      await context.sync()
+      setCharsLine(ps.charsLine)
+      setLinesPage(ps.linesPage)
+    }).catch(() => {/* 取得失敗時はデフォルト値を維持 */})
+  }, [])
 
   const applyCharsLines = () =>
     runWord(async (context) => {
