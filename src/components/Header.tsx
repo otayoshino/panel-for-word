@@ -1,8 +1,10 @@
 // src/components/Header.tsx
-// 共通ヘッダー — アドイン名を常に表示。機能画面では右端に戻るボタンを追加
+// 共通ヘッダー — アドイン名を常時表示
 
-import { Button, Text, makeStyles } from '@fluentui/react-components'
+import { useState } from 'react'
+import { Text, makeStyles } from '@fluentui/react-components'
 import type { FeatureItem } from '../types/feature'
+import { HelpModal } from './HelpModal'
 
 interface HeaderProps {
   currentFeature: FeatureItem | null
@@ -27,40 +29,43 @@ const useStyles = makeStyles({
     fontSize: '14px',
     fontWeight: '600',
   },
-  backButton: {
+  helpBtn: {
+    background: 'rgba(255,255,255,0.15)',
+    border: '1px solid rgba(255,255,255,0.4)',
     color: '#ffffff',
-    fontFamily: "'Yu Gothic', 'Meiryo', sans-serif",
+    cursor: 'pointer',
+    width: '22px',
+    height: '22px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     fontSize: '12px',
-    minWidth: 0,
-    paddingLeft: '6px',
-    paddingRight: '6px',
-    ':hover': {
-      color: '#ffffff',
-      backgroundColor: 'rgba(255,255,255,0.15)',
-    },
-    ':active': {
-      color: '#ffffff',
-    },
+    fontWeight: '700',
+    lineHeight: '1',
+    flexShrink: 0,
+    ':hover': { backgroundColor: 'rgba(255,255,255,0.3)' },
   },
 })
 
-export function Header({ currentFeature, onBack }: HeaderProps) {
+export function Header({ currentFeature: _currentFeature, onBack: _onBack }: HeaderProps) {
   const styles = useStyles()
+  const [helpOpen, setHelpOpen] = useState(false)
 
   return (
-    <div className={styles.header}>
-      <Text className={styles.title}>かんたんツールボックス</Text>
-      {currentFeature !== null && (
-        <Button
-          appearance="subtle"
-          className={styles.backButton}
-          onClick={onBack}
-          aria-label={`${currentFeature.label}から戻る`}
+    <>
+      <div className={styles.header}>
+        <Text className={styles.title}>かんたんツールボックス</Text>
+        <button
+          className={styles.helpBtn}
+          onClick={() => setHelpOpen(true)}
+          aria-label="ヘルプを開く"
         >
-          ← 戻る
-        </Button>
-      )}
-    </div>
+          ?
+        </button>
+      </div>
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+    </>
   )
 }
 
