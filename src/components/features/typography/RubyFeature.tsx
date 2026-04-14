@@ -58,7 +58,9 @@ export function RubyFeature() {
     setDictLoading(true)
     getTokenizer()
       .then(() => { setDictReady(true) })
-      .catch(() => { /* ロード失敗時は applyRuby 内でエラーを表示する */ })
+      .catch((e: unknown) => {
+        setStatus({ type: 'error', message: `辞書読み込みエラー: ${e instanceof Error ? e.message : String(e)}` })
+      })
       .finally(() => { setDictLoading(false) })
   }, [])
 

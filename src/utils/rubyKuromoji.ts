@@ -21,8 +21,8 @@ export function getTokenizer(): Promise<Tokenizer<IpadicFeatures>> {
   _initPromise = new Promise<Tokenizer<IpadicFeatures>>((resolve, reject) => {
     const timer = setTimeout(() => {
       _initPromise = null
-      reject(new Error('辞書の読み込みがタイムアウトしました（15秒）。public/dict/ が存在するか確認してください。'))
-    }, 15000)
+      reject(new Error('辞書の読み込みがタイムアウトしました（60秒）。ネットワーク環境を確認してください。'))
+    }, 60000)
 
     kuromoji.builder({ dicPath }).build((err, tokenizer) => {
       clearTimeout(timer)

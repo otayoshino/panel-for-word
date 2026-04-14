@@ -12,11 +12,10 @@ export function join(...args) {
   const str = args.join('/')
   // https:// または http:// のプロトコル部分を保護してから正規化
   const match = str.match(/^(https?:\/\/)(.*)$/)
-  const normalized = match
-    ? match[1] + match[2].replace(/\/+/g, '/')
-    : str.replace(/\/+/g, '/')
-  // ビルド時に .dat.gz → .dat に展開済みのため拡張子を合わせる
-  return normalized.replace(/\.dat\.gz$/g, '.dat')
+  if (match) {
+    return match[1] + match[2].replace(/\/+/g, '/')
+  }
+  return str.replace(/\/+/g, '/')
 }
 
 export default { join }
