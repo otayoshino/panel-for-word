@@ -94,6 +94,25 @@ if ($coreOk) {
             $i++
         }
         Write-OK "辞書ファイルを $dictFolder に保存しました"
+
+        # ダウンロードした .dat.gz を展開（ファイル名はそのまま）
+        # → ローカルサーバーは非圧縮データを配信するため DecompressionStream 不要
+        Write-Step "辞書ファイルを展開しています..."
+        Add-Type -AssemblyName System.IO.Compression
+        foreach ($f in $dictFiles) {
+            $gzPath = "$dictFolder\$f"
+            try {
+                $inStream  = [System.IO.File]::OpenRead($gzPath)
+                $gz        = New-Object System.IO.Compression.GzipStream($inStream, [System.IO.Compression.CompressionMode]::Decompress)
+                $ms        = New-Object System.IO.MemoryStream
+                $gz.CopyTo($ms)
+                $gz.Close(); $inStream.Close()
+                [System.IO.File]::WriteAllBytes($gzPath, $ms.ToArray())
+            } catch {
+                Write-Warn "展開をスキップ: $f"
+            }
+        }
+        Write-OK "辞書ファイルを展開しました"
     } catch {
         $dictOk = $false
         Write-Warn "辞書ダウンロードをスキップしました（ネットワーク制限の可能性）"
@@ -104,6 +123,10 @@ if ($coreOk) {
     if ($dictOk) {
         Write-Step "辞書サーバーを設定しています..."
         try {
+            # 非管理者でも HttpListener を起動できるよう URL ACL を登録
+            netsh http add urlacl url=http://localhost:8642/ user=Everyone 2>&1 | Out-Null
+            Write-OK "URL ACL を登録しました (localhost:8642)"
+
             Invoke-WebRequest -Uri $dictServer_url -OutFile "$addinFolder\dict-server.ps1" -UseBasicParsing
             $action   = New-ScheduledTaskAction -Execute 'powershell.exe' `
                             -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$addinFolder\dict-server.ps1`""

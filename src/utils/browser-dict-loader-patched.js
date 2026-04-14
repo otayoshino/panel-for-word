@@ -35,13 +35,18 @@ BrowserDictionaryLoader.prototype.loadArrayBuffer = function (url, callback) {
         // gzip マジックバイト (1f 8b) の有無で判別
         if (data.length >= 2 && data[0] === 0x1f && data[1] === 0x8b) {
             // まだ gzip 圧縮されている → DecompressionStream で展開
-            var ds = new DecompressionStream("gzip");
-            var writer = ds.writable.getWriter();
-            writer.write(data);
-            writer.close();
-            new Response(ds.readable).arrayBuffer()
-                .then(function (buf) { callback(null, buf); })
-                .catch(function (err) { callback(err instanceof Error ? err.message : String(err), null); });
+            try {
+                var ds = new DecompressionStream("gzip");
+                var writer = ds.writable.getWriter();
+                writer.write(data);
+                writer.close();
+                new Response(ds.readable).arrayBuffer()
+                    .then(function (buf) { callback(null, buf); })
+                    .catch(function (err) { callback(err instanceof Error ? err.message : String(err), null); });
+            } catch (e) {
+                // DecompressionStream 未対応環境 → エラーとして返す
+                callback("DecompressionStream unavailable: " + String(e), null);
+            }
         } else {
             // Content-Encoding: gzip で既に展開済み → そのまま使用
             callback(null, this.response);
