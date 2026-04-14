@@ -6,6 +6,7 @@ on:
     paths:
       - 'install.bat'
       - 'install.ps1'
+      - 'dict-server.ps1'
 
 permissions:
   contents: write
@@ -17,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Create installer.zip
-        run: zip installer.zip install.bat install.ps1
+        run: zip installer.zip install.bat install.ps1 dict-server.ps1
 
       - name: Create or update Release
         uses: softprops/action-gh-release@v2
