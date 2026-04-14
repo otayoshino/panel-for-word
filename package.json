@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "copy-dict": "node -e \"const fs=require('fs');fs.cpSync('node_modules/kuromoji/dict','public/dict',{recursive:true,force:true})\"",
+    "copy-dict": "node -e \"const fs=require('fs'),zlib=require('zlib'),path=require('path');const s='node_modules/kuromoji/dict',d='public/dict';fs.rmSync(d,{recursive:true,force:true});fs.mkdirSync(d,{recursive:true});fs.readdirSync(s).forEach(f=>{const src=path.join(s,f);if(f.endsWith('.gz')){fs.writeFileSync(path.join(d,f.replace(/\\.gz$/,'')),zlib.gunzipSync(fs.readFileSync(src)));}else{fs.copyFileSync(src,path.join(d,f));}});\"",
     "prepare": "npm run copy-dict",
     "predev": "npm run copy-dict",
     "prebuild": "npm run copy-dict",
