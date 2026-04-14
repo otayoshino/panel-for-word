@@ -20,6 +20,20 @@ export default defineConfig({
   plugins: [
     react(),
     {
+      // kuromoji の BrowserDictionaryLoader を本番ビルドでパッチ版に差し替える。
+      // alias・resolveId は @rollup/plugin-commonjs の仮想モジュール経由で importer が
+      // kuromoji パスにならないため効かない。load フックでファイルパスを直接判定して差し替える。
+      name: 'patch-kuromoji-browser-dict-loader',
+      enforce: 'pre',
+      load(id: string) {
+        const normalized = id.replace(/\\/g, '/')
+        if (normalized.includes('kuromoji') && normalized.endsWith('BrowserDictionaryLoader.js')) {
+          return fs.readFileSync(path.resolve('./src/utils/browser-dict-loader-patched.js'), 'utf-8')
+        }
+        return null
+      },
+    },
+    {
       // kuromoji 辞書ファイルを開発サーバーで /panel-for-word/dict/ として提供
       name: 'kuromoji-dict-serve',
       configureServer(server) {
