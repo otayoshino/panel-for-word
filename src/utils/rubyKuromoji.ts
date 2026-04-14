@@ -41,25 +41,26 @@ export function getTokenizer(): Promise<Tokenizer<IpadicFeatures>> {
   if (_tokenizer)    return Promise.resolve(_tokenizer)
   if (_initPromise)  return _initPromise
 
-  _initPromise = resolveDicPath().then(dicPath =>
-    new Promise<Tokenizer<IpadicFeatures>>((resolve, reject) => {
+  _initPromise = resolveDicPath().then(dicPath => {
+    console.log('[kuromoji] dicPath:', dicPath)
+    return new Promise<Tokenizer<IpadicFeatures>>((resolve, reject) => {
       const timer = setTimeout(() => {
         _initPromise = null
-        reject(new Error('辞書の読み込みがタイムアウトしました（60秒）。ネットワーク環境を確認してください。'))
+        reject(new Error(`辞書の読み込みがタイムアウトしました（60秒）。読込先: ${dicPath}`))
       }, 60000)
 
       kuromoji.builder({ dicPath }).build((err, tokenizer) => {
         clearTimeout(timer)
         if (err) {
           _initPromise = null
-          reject(new Error(`辞書の読み込みに失敗しました: ${err instanceof Error ? err.message : String(err)}`))
+          reject(new Error(`辞書の読み込みに失敗しました [${dicPath}]: ${err instanceof Error ? err.message : String(err)}`))
           return
         }
         _tokenizer = tokenizer
         resolve(tokenizer)
       })
     })
-  )
+  })
 
   return _initPromise
 }
