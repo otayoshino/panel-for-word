@@ -49,9 +49,9 @@ export function PageBreakFeature() {
         return
       }
 
-      // keepWithNext は WordApi 1.5 で直接設定可能
+      // keepWithNext は paragraphFormat 経由で設定
       for (const para of paras.items) {
-        para.keepWithNext = keepWithNext
+        para.paragraphFormat.keepWithNext = keepWithNext
       }
       await context.sync()
 
@@ -75,7 +75,7 @@ export function PageBreakFeature() {
       await context.sync()
 
       for (const para of paras.items) {
-        para.keepWithNext = false
+        para.paragraphFormat.keepWithNext = false
       }
       await context.sync()
 
