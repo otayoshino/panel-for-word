@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "copy-dict": "node -e \"const fs=require('fs');fs.cpSync('node_modules/kuromoji/dict','public/dict',{recursive:true,force:true})\"",
-    "dev": "npm run copy-dict && vite",
-    "build": "npm run copy-dict && tsc && vite build",
+    "prepare": "npm run copy-dict",
+    "predev": "npm run copy-dict",
+    "prebuild": "npm run copy-dict",
+    "dev": "vite",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
