@@ -35,6 +35,11 @@ async function equalizeOneTable(table: Word.Table, context: Word.RequestContext)
   }
   await context.sync()
 
+  // AutoFit を無効化して固定幅モードに切り替える
+  // これをしないと columnWidth の設定値が Word に上書きされる
+  table.autoFitBehavior(Word.AutoFitBehavior.fixedSize)
+  await context.sync()
+
   // 行ごとに均等幅を計算して設定
   for (const row of table.rows.items) {
     const cells = row.cells.items
