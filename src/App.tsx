@@ -240,7 +240,7 @@ export default function App() {
   // お気に入り機能ID一覧（localStorage で永続化）
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('panel-word-favorites')
+      const saved = localStorage.getItem('panel-word-favorites-v2')
       return saved !== null ? (JSON.parse(saved) as string[]) : DEFAULT_FAVORITES
     } catch {
       return DEFAULT_FAVORITES
@@ -252,14 +252,14 @@ export default function App() {
       const next = prev.includes(featureId)
         ? prev.filter((id) => id !== featureId)
         : [...prev, featureId]
-      try { localStorage.setItem('panel-word-favorites', JSON.stringify(next)) } catch { /* noop */ }
+      try { localStorage.setItem('panel-word-favorites-v2', JSON.stringify(next)) } catch { /* noop */ }
       return next
     })
   }
 
   const reorderFavorites = (newOrder: string[]) => {
     setFavorites(newOrder)
-    try { localStorage.setItem('panel-word-favorites', JSON.stringify(newOrder)) } catch { /* noop */ }
+    try { localStorage.setItem('panel-word-favorites-v2', JSON.stringify(newOrder)) } catch { /* noop */ }
   }
 
   // 選択した機能 ID に対応するコンポーネントを返す
