@@ -18,35 +18,40 @@ function toTwipPt(pt: number): number {
 }
 
 // ── 1つのテーブルに列幅均等を適用（独立した Word.run 内で呼ぶ）──────
+// 各行を独立して均等化する（行ごとにセル数・幅が異なるケースに対応）
 async function equalizeOneTable(table: Word.Table, context: Word.RequestContext) {
   table.rows.load('items')
   await context.sync()
 
-  const firstRow = table.rows.items[0]
-  if (!firstRow) return
-  firstRow.cells.load('items')
-  await context.sync()
-
-  for (const cell of firstRow.cells.items) {
-    cell.load('columnWidth')
+  for (const row of table.rows.items) {
+    row.cells.load('items')
   }
   await context.sync()
 
-  const cells = firstRow.cells.items
-  if (cells.length === 0) return
+  for (const row of table.rows.items) {
+    for (const cell of row.cells.items) {
+      cell.load('columnWidth')
+    }
+  }
+  await context.sync()
 
-  const totalWidth = cells.reduce((sum, cell) => sum + cell.columnWidth, 0)
-  if (totalWidth === 0) return
+  // 行ごとに均等幅を計算して設定
+  for (const row of table.rows.items) {
+    const cells = row.cells.items
+    if (cells.length === 0) continue
+    const totalWidth = cells.reduce((sum, cell) => sum + cell.columnWidth, 0)
+    if (totalWidth === 0) continue
 
-  // 各列を twip 単位で均等割り。最終セルに端数を吸収させて合計を保証する
-  const baseWidth = toTwipPt(totalWidth / cells.length)
-  let assigned = 0
-  for (let i = 0; i < cells.length; i++) {
-    if (i === cells.length - 1) {
-      cells[i].columnWidth = toTwipPt(totalWidth - assigned)
-    } else {
-      cells[i].columnWidth = baseWidth
-      assigned += baseWidth
+    // twip 単位で均等割り。最終セルに端数を吸収させて合計幅を保証
+    const baseWidth = toTwipPt(totalWidth / cells.length)
+    let assigned = 0
+    for (let i = 0; i < cells.length; i++) {
+      if (i === cells.length - 1) {
+        cells[i].columnWidth = toTwipPt(totalWidth - assigned)
+      } else {
+        cells[i].columnWidth = baseWidth
+        assigned += baseWidth
+      }
     }
   }
   await context.sync()
