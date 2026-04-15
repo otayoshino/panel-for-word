@@ -227,8 +227,8 @@ const useStyles = makeStyles({
 const DEFAULT_FAVORITES = [
   'page-settings', 'style-management', 'header-footer',
   'toc-update', 'tracked-changes', 'page-break',
-  'indent', 'auto-ruby', 'table-insert',
-  'table-format', 'template-text', 'template-symbol',
+  'indent', 'line-spacing', 'auto-ruby',
+  'table-insert', 'template-text', 'template-symbol',
 ]
 
 export default function App() {
