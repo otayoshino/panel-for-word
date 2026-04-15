@@ -12,40 +12,41 @@ const useStyles = makeStyles({
   sectionLabel: { color: '#4a7cb5', fontFamily: "'Yu Gothic','Meiryo',sans-serif", lineHeight: '1.6' },
 })
 
-// ── ユーティリティ：table の列幅均等化 ──────────────────────────────
-// 先頭行のセル幅のみを基準に均等化する。
-// 結合セルや AutoFit 有効の表で全行設定すると GeneralException が出るため
-// 先頭行のみ対象とする（Word は先頭行の列幅で以降の行を追従させる）。
-async function applyEqualWidth(context: Word.RequestContext, tables: Word.Table[]) {
-  // 先頭行を取得するため rows を load
-  for (const table of tables) {
-    table.rows.load('items')
+// pt → twip（1pt = 20twip）に丸めて Word 内部単位に合わせる
+function toTwipPt(pt: number): number {
+  return Math.round(pt * 20) / 20
+}
+
+// ── 1つのテーブルに列幅均等を適用（独立した Word.run 内で呼ぶ）──────
+async function equalizeOneTable(table: Word.Table, context: Word.RequestContext) {
+  table.rows.load('items')
+  await context.sync()
+
+  const firstRow = table.rows.items[0]
+  if (!firstRow) return
+  firstRow.cells.load('items')
+  await context.sync()
+
+  for (const cell of firstRow.cells.items) {
+    cell.load('columnWidth')
   }
   await context.sync()
 
-  // 先頭行のセルを load
-  const firstRows = tables.map(t => t.rows.items[0]).filter(Boolean)
-  for (const row of firstRows) {
-    row.cells.load('items')
-  }
-  await context.sync()
+  const cells = firstRow.cells.items
+  if (cells.length === 0) return
 
-  // 各セルの columnWidth を取得
-  for (const row of firstRows) {
-    for (const cell of row.cells.items) {
-      cell.load('columnWidth')
-    }
-  }
-  await context.sync()
+  const totalWidth = cells.reduce((sum, cell) => sum + cell.columnWidth, 0)
+  if (totalWidth === 0) return
 
-  // 均等幅を計算して先頭行のセルに設定
-  for (const row of firstRows) {
-    const cells = row.cells.items
-    if (cells.length === 0) continue
-    const totalWidth = cells.reduce((sum, cell) => sum + cell.columnWidth, 0)
-    const colWidth = totalWidth / cells.length
-    for (const cell of cells) {
-      cell.columnWidth = colWidth
+  // 各列を twip 単位で均等割り。最終セルに端数を吸収させて合計を保証する
+  const baseWidth = toTwipPt(totalWidth / cells.length)
+  let assigned = 0
+  for (let i = 0; i < cells.length; i++) {
+    if (i === cells.length - 1) {
+      cells[i].columnWidth = toTwipPt(totalWidth - assigned)
+    } else {
+      cells[i].columnWidth = baseWidth
+      assigned += baseWidth
     }
   }
   await context.sync()
@@ -53,20 +54,48 @@ async function applyEqualWidth(context: Word.RequestContext, tables: Word.Table[
 
 export function TableFormatFeature() {
   const styles = useStyles()
-  const { runWord, status, setStatus } = useWordRun()
+  const { runWord, runRaw, status, setStatus } = useWordRun()
 
   // ── 一括：列幅均等 ────────────────────────────────────────────────
+  // テーブルごとに独立した Word.run で処理し、1つが失敗しても継続する
   const handleEqualWidth = () =>
-    runWord(async (context) => {
-      const tables = context.document.body.tables
-      tables.load('items')
-      await context.sync()
-      if (tables.items.length === 0) {
+    runRaw(async () => {
+      // まず表の数を取得
+      let tableCount = 0
+      await Word.run(async (context) => {
+        const tables = context.document.body.tables
+        tables.load('items')
+        await context.sync()
+        tableCount = tables.items.length
+      })
+
+      if (tableCount === 0) {
         setStatus({ type: 'warning', message: '文書内に表がありません' })
         return
       }
-      await applyEqualWidth(context, tables.items)
-      setStatus({ type: 'success', message: `全ての表（${tables.items.length}件）の列幅を均等にしました` })
+
+      let succeeded = 0
+      let failed = 0
+      for (let i = 0; i < tableCount; i++) {
+        try {
+          await Word.run(async (context) => {
+            const tables = context.document.body.tables
+            tables.load('items')
+            await context.sync()
+            const table = tables.items[i]
+            if (table) await equalizeOneTable(table, context)
+          })
+          succeeded++
+        } catch {
+          failed++
+        }
+      }
+
+      if (failed === 0) {
+        setStatus({ type: 'success', message: `全ての表（${succeeded}件）の列幅を均等にしました` })
+      } else {
+        setStatus({ type: 'warning', message: `${succeeded}件成功・${failed}件はスキップされました` })
+      }
     })
 
   // ── 選択：列幅均等 ────────────────────────────────────────────────
@@ -80,7 +109,7 @@ export function TableFormatFeature() {
         setStatus({ type: 'warning', message: '表の中にカーソルを置いてください' })
         return
       }
-      await applyEqualWidth(context, [table])
+      await equalizeOneTable(table, context)
       setStatus({ type: 'success', message: '選択した表の列幅を均等にしました' })
     })
 
