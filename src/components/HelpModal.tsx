@@ -1,5 +1,5 @@
 // src/components/HelpModal.tsx
-// ヘルプモーダル — 使い方・FAQ・用語集・トラブルシューティング・お問い合わせ
+// ヘルプモーダル — 使い方・FAQ・お問い合わせ
 
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -130,45 +130,6 @@ const useStyles = makeStyles({
     lineHeight: '1.7',
     paddingLeft: '8px',
   },
-  termRow: {
-    display: 'grid',
-    gridTemplateColumns: '90px 1fr',
-    gap: '4px',
-    alignItems: 'baseline',
-  },
-  termKey: {
-    fontSize: '11px',
-    fontWeight: '700',
-    color: '#0c51a0',
-    fontFamily: "'Yu Gothic', 'Meiryo', sans-serif",
-  },
-  termVal: {
-    fontSize: '11px',
-    color: '#333',
-    fontFamily: "'Yu Gothic', 'Meiryo', sans-serif",
-    lineHeight: '1.6',
-  },
-  errBox: {
-    backgroundColor: '#fff8f0',
-    border: '1px solid #f5d0a0',
-    borderRadius: '6px',
-    padding: '8px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  errLabel: {
-    fontSize: '11px',
-    fontWeight: '700',
-    color: '#b85c00',
-    fontFamily: "'Yu Gothic', 'Meiryo', sans-serif",
-  },
-  errText: {
-    fontSize: '11px',
-    color: '#333',
-    fontFamily: "'Yu Gothic', 'Meiryo', sans-serif",
-    lineHeight: '1.6',
-  },
   contactRow: {
     display: 'flex',
     gap: '8px',
@@ -270,67 +231,6 @@ function FaqTab() {
   )
 }
 
-function GlossaryTab() {
-  const styles = useStyles()
-  const terms = [
-    { key: 'サイドロード', val: 'マニフェストファイルを使ってアドインをWordに手動で読み込む方法。開発・テスト時に使用します。' },
-    { key: 'ContentControl', val: 'Wordの「コンテンツコントロール」。テキスト枠を作成する際に使用します。' },
-    { key: 'OOXML', val: 'Office Open XMLの略。Word文書の内部フォーマットで、数式挿入などに使用します。' },
-    { key: 'textColumns', val: 'Wordの段組み設定を制御するAPIオブジェクト。段数・間隔を変更できます。' },
-    { key: 'モノルビ', val: '漢字1文字ずつにルビを付ける方式。熟語全体にまとめて付ける「グループルビ」と対比されます。' },
-    { key: '★アイコン', val: 'お気に入り登録ボタン。黄色で塗りつぶされている場合は登録済みです。' },
-  ]
-  return (
-    <>
-      {terms.map((term, i) => (
-        <div key={i} className={styles.section}>
-          <div className={styles.termRow}>
-            <Text className={styles.termKey}>{term.key}</Text>
-            <Text className={styles.termVal}>{term.val}</Text>
-          </div>
-          {i < terms.length - 1 && <div className={styles.divider} />}
-        </div>
-      ))}
-    </>
-  )
-}
-
-function TroubleTab() {
-  const styles = useStyles()
-  const items = [
-    {
-      label: 'ホワイトアウト（真っ白になる）',
-      text: '開発サーバーのURLとマニフェストのURLが一致しているか確認してください。manifest-dev.xml が https://localhost:3000 を指定しているか確認してください。',
-    },
-    {
-      label: '「値が有効範囲を超えています」エラー',
-      text: 'Wordに設定できる値の範囲を超えています。文字数は1〜200、行数は1〜200の範囲で入力してください。',
-    },
-    {
-      label: '段組み設定でエラーが表示される',
-      text: 'WordApiDesktop 1.3が必要です。Microsoft 365 Appsを最新版にアップデートすることで解消されます。',
-    },
-    {
-      label: 'ルビ辞書の読み込みが遅い',
-      text: 'kuromoji辞書ファイルの読み込みに時間がかかることがあります。しばらく待って再試行してください。',
-    },
-    {
-      label: 'フォント一覧が空になる',
-      text: 'ドキュメントが空の場合、使用フォントが取得できません。テキストが入力された状態で実行してください。',
-    },
-  ]
-  return (
-    <>
-      {items.map((item, i) => (
-        <div key={i} className={styles.errBox} style={{ marginBottom: i < items.length - 1 ? '8px' : 0 }}>
-          <Text className={styles.errLabel}>⚠ {item.label}</Text>
-          <Text className={styles.errText}>{item.text}</Text>
-        </div>
-      ))}
-    </>
-  )
-}
-
 function ContactTab() {
   const styles = useStyles()
   return (
@@ -338,36 +238,19 @@ function ContactTab() {
       <div className={styles.section}>
         <Text className={styles.sectionTitle}>サポートへのお問い合わせ</Text>
         <Text className={styles.p}>
-          ご不明な点・ご要望は以下の方法でお問い合わせください。サンプル情報のため、実際の連絡先は後日更新されます。
+          ご不明点・ご要望は下記サイトのフォームからお問い合わせください。
         </Text>
       </div>
       <div className={styles.section}>
-        <div className={styles.contactRow}>
-          <span className={styles.contactIcon}>✉</span>
-          <div className={styles.contactInfo}>
-            <Text className={styles.contactLabel}>メール</Text>
-            <Text className={styles.contactText}>support@example.com</Text>
-            <Text className={styles.contactText}>（受付時間：平日 9:00〜18:00）</Text>
-          </div>
-        </div>
-        <div className={styles.divider} />
-        <div className={styles.contactRow}>
-          <span className={styles.contactIcon}>💬</span>
-          <div className={styles.contactInfo}>
-            <Text className={styles.contactLabel}>チャットサポート</Text>
-            <Text className={styles.contactText}>公式サイトのチャットウィジェットからお問い合わせください。</Text>
-            <Text className={styles.contactText}>（受付時間：平日 10:00〜17:00）</Text>
-          </div>
-        </div>
-        <div className={styles.divider} />
-        <div className={styles.contactRow}>
-          <span className={styles.contactIcon}>📞</span>
-          <div className={styles.contactInfo}>
-            <Text className={styles.contactLabel}>電話</Text>
-            <Text className={styles.contactText}>00-0000-0000</Text>
-            <Text className={styles.contactText}>（受付時間：平日 9:00〜17:00）</Text>
-          </div>
-        </div>
+        <a
+          href="https://meiyusha.co.jp/contact/contact.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: '11px', color: '#1e4d8c', fontFamily: "'Yu Gothic', 'Meiryo', sans-serif" }}
+        >
+          https://meiyusha.co.jp/contact/contact.html
+        </a>
+        <Text className={styles.p}>（受付時間：平日 9:00〜17:30）</Text>
       </div>
     </>
   )
@@ -375,14 +258,12 @@ function ContactTab() {
 
 // ── メインコンポーネント ──────────────────────────────────────────────────────
 
-type HelpTabId = 'guide' | 'faq' | 'glossary' | 'trouble' | 'contact'
+type HelpTabId = 'guide' | 'faq' | 'contact'
 
 const HELP_TABS: { id: HelpTabId; label: string }[] = [
-  { id: 'guide',    label: '使い方' },
-  { id: 'faq',      label: 'FAQ' },
-  { id: 'glossary', label: '用語集' },
-  { id: 'trouble',  label: 'トラブル' },
-  { id: 'contact',  label: 'お問い合わせ' },
+  { id: 'guide',   label: '使い方' },
+  { id: 'faq',     label: 'FAQ' },
+  { id: 'contact', label: 'お問い合わせ' },
 ]
 
 interface HelpModalProps {
@@ -395,11 +276,9 @@ export function HelpModal({ onClose }: HelpModalProps) {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'guide':    return <GuideTab />
-      case 'faq':      return <FaqTab />
-      case 'glossary': return <GlossaryTab />
-      case 'trouble':  return <TroubleTab />
-      case 'contact':  return <ContactTab />
+      case 'guide':   return <GuideTab />
+      case 'faq':     return <FaqTab />
+      case 'contact': return <ContactTab />
     }
   }
 
