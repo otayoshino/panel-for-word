@@ -96,6 +96,34 @@
       padding: 24px;
       border-top: 1px solid #ddd;
     }
+
+    /* 機能タブ */
+    .feature-tabs { margin-top: 0; }
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      border-bottom: 2px solid #0078d4;
+      flex-wrap: wrap;
+      margin-bottom: 0;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #e8f0fb;
+      border: 1px solid #c7d8f0;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      color: #0078d4;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .tab-btn:hover { background: #d0e4f7; }
+    .tab-btn.active { background: #0078d4; color: #fff; border-color: #0078d4; }
+    .tab-panel { display: none; padding: 24px 0; }
+    .tab-panel.active { display: block; }
+    .tab-panel h3 { font-size: 15px; font-weight: 700; margin: 16px 0 8px; }
   </style>
 </head>
 <body>
@@ -157,6 +185,44 @@
     <p>よく使う機能カードを「お気に入り」タブに追加することで、毎回カテゴリを探す手間を省けます。カード右上の ★ アイコンをクリックして登録してください。</p>
   </section>
 
+  <!-- 各機能の説明 -->
+  <section class="feature-tabs">
+    <h2>各機能の説明</h2>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="favorites">お気に入り</button>
+      <button class="tab-btn" data-tab="settings">基本設定</button>
+      <button class="tab-btn" data-tab="typography">文字組</button>
+      <button class="tab-btn" data-tab="border">枠</button>
+      <button class="tab-btn" data-tab="template">定型文</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-favorites">
+      <h3>お気に入り</h3>
+      <p>（説明を後ほど追記）</p>
+    </div>
+
+    <div class="tab-panel" id="tab-settings">
+      <h3>基本設定</h3>
+      <p>（説明を後ほど追記）</p>
+    </div>
+
+    <div class="tab-panel" id="tab-typography">
+      <h3>文字組</h3>
+      <p>（説明を後ほど追記）</p>
+    </div>
+
+    <div class="tab-panel" id="tab-border">
+      <h3>枠</h3>
+      <p>（説明を後ほど追記）</p>
+    </div>
+
+    <div class="tab-panel" id="tab-template">
+      <h3>定型文</h3>
+      <p>（説明を後ほど追記）</p>
+    </div>
+  </section>
+
   <!-- バージョン履歴 -->
   <section>
     <h2>バージョン履歴</h2>
@@ -197,5 +263,16 @@
   &copy; 株式会社明友社 — かんたんツールボックス for Word
 </footer>
 
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + target).classList.add('active');
+    });
+  });
+</script>
 </body>
 </html>
