@@ -107,6 +107,7 @@
       margin-bottom: 0;
     }
     .tab-btn {
+      flex: 1;
       padding: 10px 18px;
       font-size: 14px;
       font-weight: 600;
@@ -117,6 +118,7 @@
       cursor: pointer;
       color: #0078d4;
       font-family: inherit;
+      text-align: center;
       transition: background 0.15s;
     }
     .tab-btn:hover { background: #d0e4f7; }
@@ -170,19 +172,17 @@
 
     <h3 style="font-size:15px; margin: 16px 0 8px;">1. アドインを開く</h3>
     <p>Word のリボンから <strong>ホーム</strong> タブ（または <strong>挿入</strong> タブ）内の「かんたんツールボックス」ボタンをクリックすると、画面右側にタスクパネルが表示されます。</p>
-    <img src="images/step1-open-addin.png" alt="アドインを開く手順のスクリーンショット" style="max-width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
-    <img src="images/step1-panel-favorites.png" alt="タスクパネル（お気に入りタブ）のスクリーンショット" style="max-width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
+    <img src="images/step1-open-addin.png" alt="アドインを開く手順のスクリーンショット" style="width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
+    <img src="images/step1-panel-favorites.png" alt="タスクパネル（お気に入りタブ）のスクリーンショット" style="width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
 
     <h3 style="font-size:15px; margin: 16px 0 8px;">2. 機能カードを選択する</h3>
     <p>パネル上部のカテゴリ（お気に入り・基本設定・文字組・枠・数式・定型文）をクリックして、目的の機能カードを選択します。</p>
-    <img src="images/step2-feature-cards.png" alt="機能カードを選択する手順のスクリーンショット" style="max-width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
+    <img src="images/step2-feature-cards.png" alt="機能カードを選択する手順のスクリーンショット" style="width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
 
     <h3 style="font-size:15px; margin: 16px 0 8px;">3. 操作を実行する</h3>
     <p>各カード内のボタンやスライダーを操作すると、Word ドキュメントに即座に反映されます。操作前にテキストや表を選択しておくと、選択範囲に対して書式が適用されます。</p>
-    <img src="images/step3-execute.gif" alt="操作を実行する手順のアニメーション" style="max-width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
+    <img src="images/step3-execute.gif" alt="操作を実行する手順のアニメーション" style="width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
 
-    <h3 style="font-size:15px; margin: 16px 0 8px;">4. お気に入り機能</h3>
-    <p>よく使う機能カードを「お気に入り」タブに追加することで、毎回カテゴリを探す手間を省けます。カード右上の ★ アイコンをクリックして登録してください。</p>
   </section>
 
   <!-- 各機能の説明 -->
@@ -200,7 +200,8 @@
 
     <div class="tab-panel active" id="tab-favorites">
       <h3>お気に入り</h3>
-      <p>（説明を後ほど追記）</p>
+      <p>よく使う機能カードを「お気に入り」タブに追加することで、毎回カテゴリを探す手間を省けます。カード右上の ★ アイコンをクリックして登録してください。</p>
+      <img src="images/favorites-demo.gif" alt="お気に入り機能の操作デモ" style="width:100%; border:1px solid #ddd; border-radius:6px; margin:16px 0;" />
     </div>
 
     <div class="tab-panel" id="tab-settings">
